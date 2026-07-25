@@ -117,3 +117,7 @@ Counts and settings persist to
 - Ad-hoc code signing is used. If a rebuild ever makes the keys stop working,
   re-check the Accessibility toggle (re-signing can reset the grant); the stable
   install path in `~/Applications` minimizes this.
+
+## License
+
+[MIT](LICENSE) © Amine Hmida
