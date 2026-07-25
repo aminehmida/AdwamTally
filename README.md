@@ -11,6 +11,10 @@ up; tap another key to switch to the next dhikr. Counters can have targets
 
 Requires macOS 14+.
 
+<p align="center">
+  <img src="preview.png" width="640" alt="Floating count popup over the desktop">
+</p>
+
 ## Install
 
 ### Homebrew
@@ -75,6 +79,10 @@ Record, then tap the modifier you want. Any left/right Shift, Control, Option,
 or Command works. Only *bare* taps count; using a key as part of a real shortcut
 (e.g. ⌘C) is ignored.
 
+<p align="center">
+  <img src="settings_2.png" width="640" alt="Settings — Keys tab">
+</p>
+
 ## Counters
 
 **Settings ▸ Counters** — add/remove/reorder, and per counter set:
@@ -85,11 +93,19 @@ or Command works. Only *bare* taps count; using a key as part of a real shortcut
   - **When reached** — *Reset to 0* (fresh round) or *Keep counting* (climb past).
 - Counters without a target just count up indefinitely.
 
+<p align="center">
+  <img src="settings_1.png" width="640" alt="Settings — Counters tab">
+</p>
+
 ## Appearance
 
 **Settings ▸ Appearance** — popup **size** (S/M/L), **position** (9-spot grid),
 **auto-hide** delay, and an optional **chime** when a target is reached (off by
 default). The popup appears on the screen under the mouse.
+
+<p align="center">
+  <img src="settings_3.png" width="640" alt="Settings — Appearance tab">
+</p>
 
 ## State
 
