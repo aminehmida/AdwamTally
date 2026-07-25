@@ -67,6 +67,9 @@ The keys start working immediately after you toggle it on — no relaunch needed
 | **Right Control** | +1 to current dhikr |
 | **Left Command**  | switch to next dhikr |
 
+**Tip:** you can also **double-tap** the +1 key to advance to the next dhikr,
+without binding a separate key.
+
 Rebind these (or add Previous / Reset Current) in **Settings ▸ Keys** — click
 Record, then tap the modifier you want. Any left/right Shift, Control, Option,
 or Command works. Only *bare* taps count; using a key as part of a real shortcut
