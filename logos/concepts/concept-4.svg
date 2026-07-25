@@ -1,0 +1,35 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- AdwamTally concept 4: bead progress ring -->
+  <g id="background">
+    <rect x="0" y="0" width="512" height="512" rx="115" fill="#171D2B"/>
+  </g>
+  <g id="icon">
+    <!-- Remaining beads (dim slate) -->
+    <g id="beads-remaining" fill="#333B4F">
+      <circle cx="123.1" cy="362.0" r="22"/>
+      <circle cx="90.3"  cy="293.8" r="22"/>
+      <circle cx="90.3"  cy="218.2" r="22"/>
+      <circle cx="123.1" cy="150.0" r="22"/>
+      <circle cx="182.2" cy="102.8" r="22"/>
+    </g>
+    <!-- Completed beads (green), clockwise from top -->
+    <g id="beads-completed" fill="#34C759">
+      <circle cx="256"   cy="86"    r="22"/>
+      <circle cx="329.8" cy="102.8" r="22"/>
+      <circle cx="388.9" cy="150.0" r="22"/>
+      <circle cx="421.7" cy="218.2" r="22"/>
+      <circle cx="421.7" cy="293.8" r="22"/>
+      <circle cx="388.9" cy="362.0" r="22"/>
+      <circle cx="329.8" cy="409.2" r="22"/>
+      <circle cx="256"   cy="426"   r="22"/>
+    </g>
+    <!-- Leading (current) bead, slightly larger for emphasis -->
+    <g id="bead-current" fill="#FF9F0A">
+      <circle cx="182.2" cy="409.2" r="26"/>
+    </g>
+    <!-- Center bead -->
+    <g id="center-bead">
+      <circle cx="256" cy="256" r="78" fill="#4C8DFF"/>
+    </g>
+  </g>
+</svg>

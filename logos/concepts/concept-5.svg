@@ -1,0 +1,24 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <g id="background">
+    <rect x="0" y="0" width="512" height="512" rx="115" fill="#0E2A23"/>
+  </g>
+  <g id="icon">
+    <!-- Draped misbaha strand: gentle S-curve from upper-left to lower-right -->
+    <circle cx="150" cy="96" r="26" fill="#34C06B"/>
+    <circle cx="204" cy="82" r="26" fill="#34C06B"/>
+    <circle cx="260" cy="84" r="26" fill="#34C06B"/>
+    <circle cx="312" cy="106" r="26" fill="#34C06B"/>
+    <circle cx="348" cy="148" r="26" fill="#34C06B"/>
+    <!-- Accent bead at the bend of the drape -->
+    <circle cx="358" cy="204" r="26" fill="#E5A63B"/>
+    <circle cx="340" cy="258" r="26" fill="#34C06B"/>
+    <circle cx="312" cy="308" r="26" fill="#34C06B"/>
+    <circle cx="300" cy="364" r="26" fill="#34C06B"/>
+    <!-- Larger imam bead ending the strand -->
+    <circle cx="322" cy="420" r="34" fill="#34C06B"/>
+  </g>
+  <g id="tassel">
+    <rect x="310" y="446" width="24" height="16" fill="#1E7A52"/>
+    <path d="M305 462 L339 462 L331 492 L313 492 Z" fill="#1E7A52"/>
+  </g>
+</svg>

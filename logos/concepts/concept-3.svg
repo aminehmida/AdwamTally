@@ -1,0 +1,34 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- AdwamTally — Concept 3: Tri-color dhikr bead ring (33/33/34 tasbih cycle) -->
+  <g id="background">
+    <rect x="0" y="0" width="512" height="512" rx="115" fill="#171D2B"/>
+  </g>
+  <g id="icon">
+    <g id="center-bead">
+      <circle cx="256" cy="256" r="78" fill="#F5EFE2"/>
+    </g>
+    <g id="divider-beads" fill="#E5A63B">
+      <circle cx="256" cy="106" r="28"/>
+      <circle cx="386" cy="331" r="28"/>
+      <circle cx="126" cy="331" r="28"/>
+    </g>
+    <g id="arc-subhanallah" fill="#34C759">
+      <circle cx="317" cy="119" r="24"/>
+      <circle cx="367" cy="156" r="24"/>
+      <circle cx="399" cy="210" r="24"/>
+      <circle cx="405" cy="272" r="24"/>
+    </g>
+    <g id="arc-alhamdulillah" fill="#4C8DFF">
+      <circle cx="344" cy="377" r="24"/>
+      <circle cx="287" cy="403" r="24"/>
+      <circle cx="225" cy="403" r="24"/>
+      <circle cx="168" cy="377" r="24"/>
+    </g>
+    <g id="arc-allahu-akbar" fill="#FF9F0A">
+      <circle cx="107" cy="272" r="24"/>
+      <circle cx="113" cy="210" r="24"/>
+      <circle cx="145" cy="156" r="24"/>
+      <circle cx="195" cy="119" r="24"/>
+    </g>
+  </g>
+</svg>
