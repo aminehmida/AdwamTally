@@ -64,6 +64,20 @@ system-wide keyboard monitoring). On first run the app asks for it:
 
 The keys start working immediately after you toggle it on — no relaunch needed.
 
+## Counters
+
+**Settings ▸ Counters** — add/remove/reorder, and per counter set:
+
+- **Label** (Arabic/RTL supported), **Color**
+- **Target** (optional). With a target you also choose:
+  - **Auto-advance** — jump to the next dhikr when the target is hit.
+  - **When reached** — *Reset to 0* (fresh round) or *Keep counting* (climb past).
+- Counters without a target just count up indefinitely.
+
+<p align="center">
+  <img src="settings_1.png" width="640" alt="Settings — Counters tab">
+</p>
+
 ## Default keys
 
 | Key           | Action              |
@@ -81,20 +95,6 @@ or Command works. Only *bare* taps count; using a key as part of a real shortcut
 
 <p align="center">
   <img src="settings_2.png" width="640" alt="Settings — Keys tab">
-</p>
-
-## Counters
-
-**Settings ▸ Counters** — add/remove/reorder, and per counter set:
-
-- **Label** (Arabic/RTL supported), **Color**
-- **Target** (optional). With a target you also choose:
-  - **Auto-advance** — jump to the next dhikr when the target is hit.
-  - **When reached** — *Reset to 0* (fresh round) or *Keep counting* (climb past).
-- Counters without a target just count up indefinitely.
-
-<p align="center">
-  <img src="settings_1.png" width="640" alt="Settings — Counters tab">
 </p>
 
 ## Appearance
