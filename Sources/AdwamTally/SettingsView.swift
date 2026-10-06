@@ -328,6 +328,15 @@ private struct AppearanceTab: View {
                 Button("Test sound") { NSSound(named: state.settings.chimeName)?.play() }
                     .disabled(!state.settings.chimeEnabled)
             }
+
+            Section {
+                Toggle("Reset counts after midnight", isOn: $state.settings.resetAfterMidnight)
+            } header: {
+                Text("Daily reset")
+            } footer: {
+                Text("Skipped for a night if you counted between 23:00 and midnight, so a late session isn't interrupted.")
+                    .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
     }

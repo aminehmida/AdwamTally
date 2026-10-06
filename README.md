@@ -112,6 +112,10 @@ default). The popup appears on the screen under the mouse.
 Counts and settings persist to
 `~/Library/Application Support/AdwamTally/state.json` and resume on relaunch.
 
+By default all counts reset after midnight (**Settings ▸ Appearance ▸ Daily
+reset**). If you counted between 23:00 and midnight, that night's reset is
+skipped so a late session isn't interrupted.
+
 ## Notes
 
 - Ad-hoc code signing is used. If a rebuild ever makes the keys stop working,

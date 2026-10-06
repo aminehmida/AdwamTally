@@ -302,6 +302,8 @@ struct AppSettings: Codable {
     /// Text stays fully opaque regardless.
     var backgroundOpacity: Double = 0.75
     var showBorder: Bool = true
+    /// Clear all counts once a new day starts (see AppState.resetIfNewDay).
+    var resetAfterMidnight: Bool = true
 
     init() {}
 
@@ -320,6 +322,7 @@ struct AppSettings: Codable {
         patternOpacity = try c.decodeIfPresent(Double.self, forKey: .patternOpacity) ?? def.patternOpacity
         backgroundOpacity = try c.decodeIfPresent(Double.self, forKey: .backgroundOpacity) ?? def.backgroundOpacity
         showBorder = try c.decodeIfPresent(Bool.self, forKey: .showBorder) ?? def.showBorder
+        resetAfterMidnight = try c.decodeIfPresent(Bool.self, forKey: .resetAfterMidnight) ?? def.resetAfterMidnight
     }
 
     /// Reverse lookup: which action (if any) is bound to a given modifier key.
@@ -334,6 +337,7 @@ struct PersistedState: Codable {
     var counters: [Counter]
     var activeIndex: Int
     var settings: AppSettings
+    var lastCountAt: Date? = nil
 }
 
 // MARK: - Defaults

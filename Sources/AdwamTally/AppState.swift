@@ -27,6 +27,11 @@ final class AppState: ObservableObject {
     private var advanceWorkItem: DispatchWorkItem?
     private var saveWorkItem: DispatchWorkItem?
     private var autosave: AnyCancellable?
+    private var dailyResetTimer: Timer?
+
+    /// When the last +1 happened; nil once the counts have been cleared for a
+    /// new day (nothing left to reset).
+    private var lastCountAt: Date?
 
     // MARK: Init / persistence
 
@@ -42,6 +47,7 @@ final class AppState: ObservableObject {
             counters = state.counters
             activeIndex = min(max(0, state.activeIndex), state.counters.count - 1)
             settings = state.settings
+            lastCountAt = state.lastCountAt
         } else {
             counters = Defaults.counters()
             activeIndex = 0
@@ -52,6 +58,16 @@ final class AppState: ObservableObject {
         autosave = objectWillChange.sink { [weak self] in
             self?.scheduleSave()
         }
+
+        // Catch a midnight that passed while the app was closed, then keep
+        // checking — a minute's granularity also covers sleep/wake and clock
+        // changes without extra bookkeeping.
+        resetIfNewDay()
+        let timer = Timer(timeInterval: 60, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.resetIfNewDay() }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        dailyResetTimer = timer
     }
 
     // MARK: Derived
@@ -63,6 +79,8 @@ final class AppState: ObservableObject {
     // MARK: User actions
 
     func increment() {
+        resetIfNewDay()
+        lastCountAt = Date()
         flushPendingAdvance()
         ensureActiveEnabled()
         guard counters.indices.contains(activeIndex), counters[activeIndex].enabled else { return }
@@ -128,6 +146,30 @@ final class AppState: ObservableObject {
         guard let idx = counters.firstIndex(where: { $0.id == id }) else { return }
         counters[idx].enabled = enabled
         ensureActiveEnabled()
+    }
+
+    // MARK: Daily reset
+
+    /// Clears all counts once a new day has started. A midnight crossed
+    /// mid-session is skipped: if the last count fell between 23:00 and
+    /// midnight, the reset waits for the following midnight so a late session
+    /// isn't interrupted. Silent — the overlay isn't shown for it.
+    func resetIfNewDay(now: Date = Date()) {
+        guard settings.resetAfterMidnight, let last = lastCountAt else { return }
+        let cal = Calendar.current
+        guard let midnight = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: last)) else { return }
+        let lateSession = cal.component(.hour, from: last) >= 23
+        let due = lateSession ? (cal.date(byAdding: .day, value: 1, to: midnight) ?? midnight) : midnight
+        guard now >= due else { return }
+
+        advanceWorkItem?.cancel()
+        advanceWorkItem = nil
+        pendingAdvance = false
+        for i in counters.indices { counters[i].count = 0 }
+        activeIndex = 0
+        ensureActiveEnabled()
+        lastCountAt = nil
+        scheduleSave()
     }
 
     // MARK: Auto-advance sequencing
@@ -217,7 +259,8 @@ final class AppState: ObservableObject {
     }
 
     func saveNow() {
-        let state = PersistedState(counters: counters, activeIndex: activeIndex, settings: settings)
+        let state = PersistedState(counters: counters, activeIndex: activeIndex, settings: settings,
+                                   lastCountAt: lastCountAt)
         guard let data = try? JSONEncoder().encode(state) else { return }
         let url = Self.stateURL
         try? FileManager.default.createDirectory(
