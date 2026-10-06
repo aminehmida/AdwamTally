@@ -95,6 +95,22 @@ enum PopupPosition: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// The corner/edge the popup grows out of when it appears — the side
+    /// closest to the screen edge it's pinned to.
+    var revealAnchor: UnitPoint {
+        switch self {
+        case .topLeft: return .topLeading
+        case .topCenter: return .top
+        case .topRight: return .topTrailing
+        case .middleLeft: return .leading
+        case .center: return .center
+        case .middleRight: return .trailing
+        case .bottomLeft: return .bottomLeading
+        case .bottomCenter: return .bottom
+        case .bottomRight: return .bottomTrailing
+        }
+    }
+
     /// Origin (bottom-left, Cocoa coordinates) for a window of `size` inside
     /// `screen`'s visible frame, honoring `margin` from the edges.
     func origin(for size: CGSize, in screen: NSScreen, margin: CGFloat) -> CGPoint {

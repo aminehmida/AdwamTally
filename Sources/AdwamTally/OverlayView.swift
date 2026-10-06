@@ -10,10 +10,18 @@ enum PatternTile {
     }()
 }
 
+/// Drives the pop-in when the overlay appears from hidden. Owned by
+/// OverlayController, which flips `shown` off and back on to replay it.
+@MainActor
+final class OverlayReveal: ObservableObject {
+    @Published var shown = true
+}
+
 /// The floating HUD content: dhikr label + current count, on a modern macOS
 /// "Liquid Glass" card themed by the active counter's color.
 struct OverlayView: View {
     @ObservedObject var state: AppState
+    @ObservedObject var reveal: OverlayReveal
     @State private var pulse = false
 
     var body: some View {
@@ -29,6 +37,11 @@ struct OverlayView: View {
                                 showBorder: state.settings.showBorder))
             .scaleEffect(pulse ? 1.07 : 1.0)
             .animation(.spring(response: 0.32, dampingFraction: 0.55), value: pulse)
+            // Settle in from the screen edge the popup is pinned to. Scale only —
+            // the fade is done on the panel's alpha, since a SwiftUI opacity
+            // over the glass flattens it.
+            .scaleEffect(reveal.shown ? 1 : 0.96,
+                         anchor: state.settings.popupPosition.revealAnchor)
             .padding(size.shadowMargin)   // room for the drop shadow
             .fixedSize(horizontal: false, vertical: true)  // bounded width, height fits
             .onChange(of: state.completionToken) { _, _ in

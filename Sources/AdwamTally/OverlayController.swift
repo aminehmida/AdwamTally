@@ -10,6 +10,7 @@ final class OverlayController {
     private let state: AppState
     private let panel: NSPanel
     private let hostingView: NSHostingView<OverlayView>
+    private let reveal = OverlayReveal()
     private var hideTimer: Timer?
     /// Bumped on every show so a fade-out that's still in flight knows it was
     /// superseded and must not order the panel out.
@@ -22,7 +23,7 @@ final class OverlayController {
     init(state: AppState) {
         self.state = state
 
-        hostingView = NSHostingView(rootView: OverlayView(state: state))
+        hostingView = NSHostingView(rootView: OverlayView(state: state, reveal: reveal))
         hostingView.translatesAutoresizingMaskIntoConstraints = true
         // Keep intrinsicContentSize (so we can size the panel), but drop the
         // min/max window-size options whose "content size extrema" path throws
@@ -65,14 +66,31 @@ final class OverlayController {
         panel.setFrame(NSRect(origin: origin, size: size), display: true)
 
         showGeneration &+= 1
-        if !panel.isVisible { panel.alphaValue = 0 }
+        // Only replay the reveal when appearing from hidden; a show during the
+        // fade-out (or while already up) just fades back in.
+        let revealing = !panel.isVisible
+        if revealing {
+            panel.alphaValue = 0
+            reveal.shown = false
+        }
         // Always re-order front: the panel can be "visible" yet stranded on
         // another Space (e.g. after switching to a full-screen app), and
         // isVisible alone can't tell. This is idempotent when already on top.
         panel.orderFrontRegardless()
         NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = 0.12
+            ctx.duration = revealing ? 0.3 : 0.12
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
             panel.animator().alphaValue = 1
+        }
+        if revealing {
+            // Next runloop pass, so the collapsed state is rendered first and
+            // the animation has something to start from. A long, gentle
+            // ease-out with no overshoot keeps it calm.
+            DispatchQueue.main.async { [reveal] in
+                withAnimation(.timingCurve(0.16, 1, 0.3, 1, duration: 0.45)) {
+                    reveal.shown = true
+                }
+            }
         }
         resetHideTimer()
     }
