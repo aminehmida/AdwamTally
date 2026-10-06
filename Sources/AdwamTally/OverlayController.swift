@@ -11,6 +11,9 @@ final class OverlayController {
     private let panel: NSPanel
     private let hostingView: NSHostingView<OverlayView>
     private var hideTimer: Timer?
+    /// Bumped on every show so a fade-out that's still in flight knows it was
+    /// superseded and must not order the panel out.
+    private var showGeneration = 0
     private var cancellable: AnyCancellable?
 
     // The card already carries transparent shadow padding, so keep this small.
@@ -61,10 +64,12 @@ final class OverlayController {
         let origin = state.settings.popupPosition.origin(for: size, in: screen, margin: margin)
         panel.setFrame(NSRect(origin: origin, size: size), display: true)
 
-        if !panel.isVisible {
-            panel.alphaValue = 0
-            panel.orderFrontRegardless()
-        }
+        showGeneration &+= 1
+        if !panel.isVisible { panel.alphaValue = 0 }
+        // Always re-order front: the panel can be "visible" yet stranded on
+        // another Space (e.g. after switching to a full-screen app), and
+        // isVisible alone can't tell. This is idempotent when already on top.
+        panel.orderFrontRegardless()
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.duration = 0.12
             panel.animator().alphaValue = 1
@@ -83,11 +88,16 @@ final class OverlayController {
     }
 
     private func hide() {
+        let generation = showGeneration
         NSAnimationContext.runAnimationGroup({ ctx in
             ctx.duration = 0.35
             panel.animator().alphaValue = 0
         }, completionHandler: { [weak self] in
-            MainActor.assumeIsolated { self?.panel.orderOut(nil) }
+            MainActor.assumeIsolated {
+                // A show() during the fade wins; don't yank the panel away.
+                guard let self, self.showGeneration == generation else { return }
+                self.panel.orderOut(nil)
+            }
         })
     }
 
