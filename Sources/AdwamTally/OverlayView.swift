@@ -103,13 +103,11 @@ private struct GlassCard: ViewModifier {
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         if #available(macOS 26.0, *) {
+            // Plain, untinted Liquid Glass. Tints, rims and extra shadows layered
+            // on top flatten it into what reads as an ordinary blur, so only the
+            // user's optional pattern and border are drawn over it.
             content
-                // Real Liquid Glass: rendered at full strength so its specular
-                // reflective edge stays crisp. Translucency rides on the tint's
-                // alpha (scaled by the user's opacity slider), not a flattening
-                // .opacity() over the whole layer.
                 .background(glassBackground(shape))
-                .shadow(color: .black.opacity(0.26), radius: 18, x: 0, y: 9)
         } else {
             content
                 .background(legacyBackground(shape).opacity(backgroundOpacity))
@@ -122,37 +120,12 @@ private struct GlassCard: ViewModifier {
     @ViewBuilder
     private func glassBackground(_ shape: RoundedRectangle) -> some View {
         ZStack {
-            // Only the glass lives inside the container; a plain tiled image
-            // sibling gets swallowed by its compositing, so the pattern and rim
-            // are layered over it here instead.
-            GlassEffectContainer {
-                Color.clear
-                    .glassEffect(.regular.tint(tint.opacity(0.14 * backgroundOpacity)).interactive(),
-                                 in: shape)
-            }
+            Color.clear.glassEffect(.regular, in: shape)
             patternLayer(shape)
-            specularEdge(shape)
-        }
-    }
-
-    /// A bright, light-angled rim on top of the native glass so the reflective
-    /// edge reads clearly even over static, low-contrast backgrounds — light
-    /// catching the top-leading corner and easing off toward the bottom.
-    @ViewBuilder
-    private func specularEdge(_ shape: RoundedRectangle) -> some View {
-        // Highlight sweep (always on — it's what makes the glass edge "pop").
-        shape.strokeBorder(
-            LinearGradient(
-                colors: [.white.opacity(0.7), .white.opacity(0.12),
-                         .white.opacity(0.0), .white.opacity(0.28)],
-                startPoint: .topLeading, endPoint: .bottomTrailing),
-            lineWidth: 1.2
-        )
-        .blendMode(.plusLighter)
-        // Optional accent-colored rim tied to the counter color.
-        if showBorder {
-            shape.strokeBorder(tint.opacity(0.35), lineWidth: 1)
-                .blendMode(.plusLighter)
+            if showBorder {
+                shape.strokeBorder(tint.opacity(0.35), lineWidth: 1)
+                    .blendMode(.plusLighter)
+            }
         }
     }
 
