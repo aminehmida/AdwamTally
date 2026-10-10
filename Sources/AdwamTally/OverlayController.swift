@@ -8,7 +8,7 @@ import SwiftUI
 @MainActor
 final class OverlayController {
     private let state: AppState
-    private let panel: NSPanel
+    private var panel: NSPanel
     private let hostingView: NSHostingView<OverlayView>
     private let reveal = OverlayReveal()
     private var hideTimer: Timer?
@@ -30,22 +30,7 @@ final class OverlayController {
         // during the display cycle for a borderless panel.
         hostingView.sizingOptions = [.intrinsicContentSize]
 
-        panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 200, height: 120),
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: false
-        )
-        panel.isFloatingPanel = true
-        panel.level = .statusBar
-        panel.backgroundColor = .clear
-        panel.isOpaque = false
-        panel.hasShadow = false   // SwiftUI draws the drop shadow (see GlassCard)
-        panel.ignoresMouseEvents = true
-        panel.hidesOnDeactivate = false
-        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
-        panel.contentView = hostingView
-        panel.alphaValue = 0
+        panel = Self.makePanel(content: hostingView)
 
         // Re-show + reposition on every user-visible change.
         cancellable = state.$eventToken
@@ -55,10 +40,44 @@ final class OverlayController {
             }
     }
 
+    private static func makePanel(content: NSView) -> NSPanel {
+        let panel = NSPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 200, height: 120),
+            styleMask: [.borderless, .nonactivatingPanel],
+            backing: .buffered,
+            defer: false
+        )
+        panel.isReleasedWhenClosed = false
+        panel.isFloatingPanel = true
+        panel.level = .statusBar
+        panel.backgroundColor = .clear
+        panel.isOpaque = false
+        panel.hasShadow = false   // SwiftUI draws the drop shadow (see GlassCard)
+        panel.ignoresMouseEvents = true
+        panel.hidesOnDeactivate = false
+        panel.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
+        panel.contentView = content
+        panel.alphaValue = 0
+        return panel
+    }
+
+    /// After running a while, the window server can drop the panel from every
+    /// Space but one despite .canJoinAllSpaces, so it keeps showing on a
+    /// desktop the user isn't looking at (e.g. while in a full-screen app).
+    /// Re-setting collectionBehavior doesn't repair that; a new window does.
+    private func replacePanelIfOffActiveSpace() {
+        guard !panel.isOnActiveSpace else { return }
+        let stale = panel
+        stale.orderOut(nil)
+        stale.contentView = nil
+        panel = Self.makePanel(content: hostingView)
+    }
+
     // MARK: Show / hide
 
     func show() {
         guard let screen = screenUnderMouse() else { return }
+        replacePanelIfOffActiveSpace()
         hostingView.layoutSubtreeIfNeeded()
         var size = hostingView.fittingSize
         if size.width < 1 || size.height < 1 { size = hostingView.intrinsicContentSize }
@@ -72,11 +91,8 @@ final class OverlayController {
         if revealing {
             panel.alphaValue = 0
             reveal.shown = false
+            panel.orderFrontRegardless()
         }
-        // Always re-order front: the panel can be "visible" yet stranded on
-        // another Space (e.g. after switching to a full-screen app), and
-        // isVisible alone can't tell. This is idempotent when already on top.
-        panel.orderFrontRegardless()
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.duration = revealing ? 0.3 : 0.12
             ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
