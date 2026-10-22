@@ -118,6 +118,10 @@ dhikr, and Esc (or the same tap again) to leave. Pick the background in
 **Settings ▸ Appearance ▸ Full screen**: *Pattern*, *Aurora*, *Frosted*, or
 *Night Sky*, each tinted by the active dhikr's color.
 
+<p align="center">
+  <img src="fullscreen.png" width="640" alt="Full-screen mode with the Pattern background">
+</p>
+
 ## State
 
 Counts and settings persist to
