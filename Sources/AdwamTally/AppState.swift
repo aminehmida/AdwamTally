@@ -20,6 +20,9 @@ final class AppState: ObservableObject {
     /// is recording a new key binding in Settings).
     @Published var suspendHotkeys = false
 
+    /// True while the full-screen view is up; the floating popup stays hidden.
+    @Published var isFullscreen = false
+
     /// How long the completed counter stays visible before auto-advancing.
     private let completionHold: TimeInterval = 0.8
 

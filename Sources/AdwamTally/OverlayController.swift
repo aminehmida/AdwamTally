@@ -15,7 +15,7 @@ final class OverlayController {
     /// Bumped on every show so a fade-out that's still in flight knows it was
     /// superseded and must not order the panel out.
     private var showGeneration = 0
-    private var cancellable: AnyCancellable?
+    private var cancellables: Set<AnyCancellable> = []
 
     // The card already carries transparent shadow padding, so keep this small.
     private let margin: CGFloat = 4
@@ -33,11 +33,20 @@ final class OverlayController {
         panel = Self.makePanel(content: hostingView)
 
         // Re-show + reposition on every user-visible change.
-        cancellable = state.$eventToken
+        state.$eventToken
             .dropFirst()
             .sink { [weak self] _ in
                 MainActor.assumeIsolated { self?.show() }
             }
+            .store(in: &cancellables)
+
+        // The full-screen view shows the count itself; get out of its way.
+        state.$isFullscreen
+            .filter { $0 }
+            .sink { [weak self] _ in
+                MainActor.assumeIsolated { self?.hide() }
+            }
+            .store(in: &cancellables)
     }
 
     private static func makePanel(content: NSView) -> NSPanel {
@@ -76,7 +85,7 @@ final class OverlayController {
     // MARK: Show / hide
 
     func show() {
-        guard let screen = screenUnderMouse() else { return }
+        guard !state.isFullscreen, let screen = NSScreen.underMouse else { return }
         replacePanelIfOffActiveSpace()
         hostingView.layoutSubtreeIfNeeded()
         var size = hostingView.fittingSize
@@ -122,6 +131,7 @@ final class OverlayController {
     }
 
     private func hide() {
+        hideTimer?.invalidate()
         let generation = showGeneration
         NSAnimationContext.runAnimationGroup({ ctx in
             ctx.duration = 0.35
@@ -134,9 +144,11 @@ final class OverlayController {
             }
         })
     }
+}
 
-    private func screenUnderMouse() -> NSScreen? {
+extension NSScreen {
+    static var underMouse: NSScreen? {
         let loc = NSEvent.mouseLocation
-        return NSScreen.screens.first { $0.frame.contains(loc) } ?? NSScreen.main
+        return screens.first { $0.frame.contains(loc) } ?? main
     }
 }

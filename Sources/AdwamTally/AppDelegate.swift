@@ -5,17 +5,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let state = AppState.shared
     private var monitor: HotkeyMonitor?
     private var overlay: OverlayController?
+    private var fullscreen: FullscreenController?
 
-    /// On the increment key: single tap = +1, double tap = next dhikr. We hold a
-    /// pending +1 briefly to see whether a second tap arrives.
-    private let doubleTapWindow: TimeInterval = 0.28
-    private var pendingIncrement: DispatchWorkItem?
+    /// On the increment key: single tap = +1, double tap = next dhikr, triple
+    /// tap = toggle full screen (each gesture can be turned off). While one is
+    /// enabled, taps are held briefly to see whether another one follows.
+    private let multiTapWindow: TimeInterval = 0.28
+    private var pendingTaps = 0
+    private var pendingTapAction: DispatchWorkItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Menu-bar-only: no Dock icon.
         NSApp.setActivationPolicy(.accessory)
 
         overlay = OverlayController(state: state)
+        fullscreen = FullscreenController(state: state)
 
         let m = HotkeyMonitor()
         m.onTap = { [weak self] key in self?.handleTap(key) }
@@ -37,18 +41,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        if let pending = pendingIncrement {
-            // Second tap within the window → it's a double tap → next dhikr.
-            pending.cancel()
-            pendingIncrement = nil
+        let settings = state.settings
+        let maxTaps = settings.tripleTapFullscreen ? 3 : settings.doubleTapNext ? 2 : 1
+        pendingTapAction?.cancel()
+        pendingTaps += 1
+        if pendingTaps >= maxTaps {
+            // Nothing can follow the longest enabled gesture, so act right away.
+            commitPendingTaps()
+            return
+        }
+        let work = DispatchWorkItem { [weak self] in
+            self?.commitPendingTaps()
+        }
+        pendingTapAction = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + multiTapWindow, execute: work)
+    }
+
+    /// Acts on the taps gathered so far: as a gesture if that one is enabled,
+    /// otherwise as +1 each.
+    private func commitPendingTaps() {
+        let taps = pendingTaps
+        pendingTaps = 0
+        pendingTapAction?.cancel()
+        pendingTapAction = nil
+        if taps == 3 && state.settings.tripleTapFullscreen {
+            fullscreen?.toggle()
+        } else if taps == 2 && state.settings.doubleTapNext {
             state.next()
         } else {
-            let work = DispatchWorkItem { [weak self] in
-                self?.pendingIncrement = nil
-                self?.state.increment()
-            }
-            pendingIncrement = work
-            DispatchQueue.main.asyncAfter(deadline: .now() + doubleTapWindow, execute: work)
+            for _ in 0..<taps { state.increment() }
         }
     }
 
@@ -58,6 +79,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         case .next:         state.next()
         case .previous:     state.previous()
         case .resetCurrent: state.resetCurrent()
+        case .toggleFullscreen: fullscreen?.toggle()
         }
     }
 }

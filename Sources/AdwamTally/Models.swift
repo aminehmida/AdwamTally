@@ -137,6 +137,23 @@ enum PopupPosition: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Full-screen background
+
+enum FullscreenBackground: String, Codable, CaseIterable, Identifiable {
+    case pattern, aurora, frosted, nightSky
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .pattern: return "Pattern"
+        case .aurora: return "Aurora"
+        case .frosted: return "Frosted"
+        case .nightSky: return "Night Sky"
+        }
+    }
+}
+
 // MARK: - Modifier keys (left/right distinguished by keyCode)
 
 enum ModifierKey: String, Codable, CaseIterable, Identifiable {
@@ -224,6 +241,7 @@ enum CounterAction: String, Codable, CaseIterable, Identifiable {
     case next
     case previous
     case resetCurrent
+    case toggleFullscreen
 
     var id: String { rawValue }
 
@@ -233,6 +251,7 @@ enum CounterAction: String, Codable, CaseIterable, Identifiable {
         case .next: return "Next counter"
         case .previous: return "Previous counter"
         case .resetCurrent: return "Reset current"
+        case .toggleFullscreen: return "Toggle full screen"
         }
     }
 }
@@ -320,6 +339,11 @@ struct AppSettings: Codable {
     var showBorder: Bool = true
     /// Clear all counts once a new day starts (see AppState.resetIfNewDay).
     var resetAfterMidnight: Bool = true
+    var fullscreenBackground: FullscreenBackground = .pattern
+    /// Increment-key gestures. Each enabled one makes a tap wait briefly for a
+    /// follow-up before counting (see AppDelegate.handleTap).
+    var doubleTapNext: Bool = true
+    var tripleTapFullscreen: Bool = true
 
     init() {}
 
@@ -339,6 +363,10 @@ struct AppSettings: Codable {
         backgroundOpacity = try c.decodeIfPresent(Double.self, forKey: .backgroundOpacity) ?? def.backgroundOpacity
         showBorder = try c.decodeIfPresent(Bool.self, forKey: .showBorder) ?? def.showBorder
         resetAfterMidnight = try c.decodeIfPresent(Bool.self, forKey: .resetAfterMidnight) ?? def.resetAfterMidnight
+        fullscreenBackground = try c.decodeIfPresent(FullscreenBackground.self, forKey: .fullscreenBackground)
+            ?? def.fullscreenBackground
+        doubleTapNext = try c.decodeIfPresent(Bool.self, forKey: .doubleTapNext) ?? def.doubleTapNext
+        tripleTapFullscreen = try c.decodeIfPresent(Bool.self, forKey: .tripleTapFullscreen) ?? def.tripleTapFullscreen
     }
 
     /// Reverse lookup: which action (if any) is bound to a given modifier key.

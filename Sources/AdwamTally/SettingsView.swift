@@ -220,12 +220,20 @@ private struct KeysTab: View {
             } header: {
                 Text("Tap a modifier key by itself to trigger an action.")
             } footer: {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Single-tap the Increment key to add 1; double-tap it to move to the next dhikr.")
-                    Text("Only bare taps count — using a key as part of a shortcut (e.g. ⌘C) is ignored. Requires Accessibility permission.")
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text("Only bare taps count — using a key as part of a shortcut (e.g. ⌘C) is ignored. Requires Accessibility permission.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Toggle("Double-tap for next dhikr", isOn: $state.settings.doubleTapNext)
+                Toggle("Triple-tap for full screen", isOn: $state.settings.tripleTapFullscreen)
+            } header: {
+                Text("Increment key")
+            } footer: {
+                Text("While either is on, a tap waits a moment for another before counting. Turn both off for an instant +1.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .formStyle(.grouped)
@@ -319,6 +327,16 @@ private struct AppearanceTab: View {
                 }
             }
 
+            Section {
+                BackgroundPicker(selection: $state.settings.fullscreenBackground,
+                                 tint: Color(hex: state.active?.colorHex ?? "#4C8DFF"))
+            } header: {
+                Text("Full screen")
+            } footer: {
+                Text(fullscreenHint)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Completion") {
                 Toggle("Play chime when target reached", isOn: $state.settings.chimeEnabled)
                 Picker("Sound", selection: $state.settings.chimeName) {
@@ -339,6 +357,50 @@ private struct AppearanceTab: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    private var fullscreenHint: String {
+        var ways: [String] = []
+        if let key = state.settings.bindings[.toggleFullscreen] { ways.append("tap \(key.displayName)") }
+        if state.settings.tripleTapFullscreen { ways.append("triple-tap the Increment key") }
+        guard !ways.isEmpty else {
+            return "Bind a key to Toggle full screen or turn on triple-tap in the Keys tab to open full screen."
+        }
+        let how = ways.joined(separator: " or ")
+        return how.prefix(1).uppercased() + how.dropFirst() + " to enter or leave full screen; Esc also exits."
+    }
+}
+
+/// Live previews of each full-screen background, tinted by the active counter.
+private struct BackgroundPicker: View {
+    @Binding var selection: FullscreenBackground
+    var tint: Color
+
+    var body: some View {
+        HStack(spacing: 10) {
+            ForEach(FullscreenBackground.allCases) { bg in
+                Button {
+                    selection = bg
+                } label: {
+                    VStack(spacing: 5) {
+                        FullscreenBackdrop(style: bg, tint: tint)
+                            .frame(width: 88, height: 56)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                    .strokeBorder(selection == bg ? Color.accentColor : Color.secondary.opacity(0.25),
+                                                  lineWidth: selection == bg ? 2 : 1)
+                            )
+                        Text(bg.displayName)
+                            .font(.caption)
+                            .foregroundStyle(selection == bg ? .primary : .secondary)
+                    }
+                }
+                .buttonStyle(.plain)
+                .help(bg.displayName)
+            }
+        }
+        .frame(maxWidth: .infinity)
     }
 }
 

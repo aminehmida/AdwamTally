@@ -86,12 +86,14 @@ The keys start working immediately after you toggle it on — no relaunch needed
 | **Left Command**  | switch to next dhikr |
 
 **Tip:** you can also **double-tap** the +1 key to advance to the next dhikr,
-without binding a separate key.
+without binding a separate key, and **triple-tap** it for full screen. Either
+gesture can be turned off in **Settings ▸ Keys**; with both off, a tap counts
+instantly instead of waiting a moment for a follow-up.
 
-Rebind these (or add Previous / Reset Current) in **Settings ▸ Keys** — click
-Record, then tap the modifier you want. Any left/right Shift, Control, Option,
-or Command works. Only *bare* taps count; using a key as part of a real shortcut
-(e.g. ⌘C) is ignored.
+Rebind these (or add Previous / Reset Current / Toggle full screen) in
+**Settings ▸ Keys** — click Record, then tap the modifier you want. Any
+left/right Shift, Control, Option, or Command works. Only *bare* taps count;
+using a key as part of a real shortcut (e.g. ⌘C) is ignored.
 
 <p align="center">
   <img src="settings_2.png" width="640" alt="Settings — Keys tab">
@@ -106,6 +108,15 @@ default). The popup appears on the screen under the mouse.
 <p align="center">
   <img src="settings_3.png" width="640" alt="Settings — Appearance tab">
 </p>
+
+## Full screen
+
+**Triple-tap** the +1 key (or tap a key bound to *Toggle full screen* in
+**Settings ▸ Keys**) to fill the screen with the current dhikr, its count, and a
+ring filling toward the target. Click or press Space to count, ← / → to switch
+dhikr, and Esc (or the same tap again) to leave. Pick the background in
+**Settings ▸ Appearance ▸ Full screen**: *Pattern*, *Aurora*, *Frosted*, or
+*Night Sky*, each tinted by the active dhikr's color.
 
 ## State
 
